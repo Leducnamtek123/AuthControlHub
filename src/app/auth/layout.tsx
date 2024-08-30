@@ -1,5 +1,10 @@
+// AuthLayout.tsx
+
+'use client'
 import { ReactNode } from 'react';
-import backgroundImage from '@/app/auth/assets/auth_bg.jpg'; // Adjust the import path as needed
+import { Provider } from 'react-redux';
+import store from '../redux/store';
+import FooterSmall from './footer';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -7,15 +12,19 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <div
-      className="flex items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: `url(${backgroundImage.src})`, backgroundSize: 'cover' }}
-    >
-      <div className="w-full max-w-md space-y-6 bg-clear">
-        {children}
-      </div>
+    <Provider store={store}>
+      <main>
+        <section className="relative w-full h-full py-40 min-h-screen">
+          <div
+            className="absolute top-0 w-full h-full bg-gray bg-no-repeat bg-full"
+          ></div>
+          {children}
+        </section>
+      </main>
+      <FooterSmall absolute />
 
-    </div>
+    </Provider>
+
   );
 };
 
