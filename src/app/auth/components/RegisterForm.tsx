@@ -1,123 +1,130 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import authService from '../services/auth.service';
-import { register } from 'module';
-import { signUp } from '@/app/redux/slices/auth.slices';
-interface RegisterFormProps {
-    onSuccess: () => void;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { Input, Checkbox, Form, Spin } from 'antd';
+import { RootState } from '@/app/redux/store';
+import { signUpAsync } from '@/app/redux/slices/auth.slices';
+import { useRouter } from 'next/navigation';
+import useNotificationMessage from '@/app/hooks/useNotificationMessage';
+import { useLoading } from '@/app/contexts/LoadingContext';
+import Link from 'next/link';
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
+export const RegisterForm: React.FC = () => {
     const dispatch = useDispatch();
-    const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const { setLoading } = useLoading(); // Get the setLoading function from context
+    const router = useRouter();
+    const { success, error: notifyError } = useNotificationMessage();
     const [agree, setAgree] = useState(false);
-    const [error, setError] = useState('');
 
-    const handleSignup = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSignup = async (values: any) => {
+        const { email, password, firstName, lastName, phoneNumber } = values;
 
-        // Check if the user has agreed to the privacy policy
         if (!agree) {
-            alert('You must agree to the Privacy Policy');
+            notifyError('You must agree to the Privacy Policy');
             return;
         }
 
-        try {
-            // Use authService for login
-            const user = authService.signUp({ email, password, username });
-            dispatch(signUp({ email, password, username }) as any);
-            onSuccess(); // Callback to handle post-login actions
-        } catch (error) {
-            setError('Invalid credentials');
-        }
+        setLoading(true); // Set loading to true before starting the request
 
+        try {
+            await dispatch(signUpAsync({ email, password, firstName, lastName, phoneNumber }) as any).unwrap();
+            success('Registration successful! Redirecting to login page...');
+            router.push('/auth/login');
+        } catch (err: any) {
+            notifyError('An error occurred while registering. Please try again.');
+        } finally {
+            setLoading(false); // Set loading to false after request is completed
+        }
     };
 
     return (
+        <div className="relative">
+            <Form onFinish={handleSignup} layout="vertical">
+                <Form.Item
+                    name="email"
+                    label="Email"
+                    className="relative w-full mb-3"
+                    rules={[{ required: true, message: 'Please input your email!' }]}
+                >
+                    <Input
+                        type="email"
+                        className="px-3 py-3 text-sm rounded shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        placeholder="Email"
+                    />
+                </Form.Item>
 
-        <form onSubmit={handleSignup}>
-            {error && (
-                <div className="text-red-500 text-center mb-4">
-                    {error}
-                </div>
-            )}
+                <Form.Item
+                    name="password"
+                    label="Password"
+                    className="relative w-full mb-3"
+                    rules={[{ required: true, message: 'Please input your password!' }]}
+                >
+                    <Input.Password
+                        className="px-3 py-3 text-sm rounded shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        placeholder="Password"
+                    />
+                </Form.Item>
+                <Form.Item
+                    name="firstName"
+                    label="First Name"
+                    className="relative w-full mb-3"
+                >
+                    <Input
+                        className="px-3 py-3 text-sm rounded shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        placeholder="First Name"
+                    />
+                </Form.Item>
 
-            <div className="relative w-full mb-3">
-                <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="name">
-                    Name
-                </label>
-                <input
-                    type="text"
-                    id="name"
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                    placeholder="Name"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-            </div>
+                <Form.Item
+                    name="lastName"
+                    label="Last Name"
+                    className="relative w-full mb-3"
+                >
+                    <Input
+                        className="px-3 py-3 text-sm rounded shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        placeholder="Last Name"
+                    />
+                </Form.Item>
 
-            <div className="relative w-full mb-3">
-                <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="email">
-                    Email
-                </label>
-                <input
-                    type="email"
-                    id="email"
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-
-            <div className="relative w-full mb-3">
-                <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="password">
-                    Password
-                </label>
-                <input
-                    type="password"
-                    id="password"
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-
-            <div>
-                <label className="inline-flex items-center cursor-pointer">
-                    <input
-                        id="customCheckRegister"
-                        type="checkbox"
-                        className="form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150"
+                <Form.Item
+                    name="phoneNumber"
+                    label="Phone Number"
+                    className="relative w-full mb-3"
+                >
+                    <Input
+                        className="px-3 py-3 text-sm rounded shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                        placeholder="Phone Number"
+                    />
+                </Form.Item>
+                <Form.Item
+                    name="agree"
+                    valuePropName="checked"
+                    className="relative w-full mb-3"
+                >
+                    <Checkbox
                         checked={agree}
                         onChange={(e) => setAgree(e.target.checked)}
-                    />
-                    <span className="ml-2 text-sm font-semibold text-blueGray-600">
+                    >
                         I agree with the{" "}
-                        <a
-                            href="#pablo"
+                        <Link
+                            href="/auth/privacy-policy" // Updated href to point to your Privacy Policy page
                             className="text-lightBlue-500"
-                            onClick={(e) => e.preventDefault()}
+                            target="_blank" // Opens the link in a new tab
+                            rel="noopener noreferrer" // Security measure when opening in a new tab
                         >
                             Privacy Policy
-                        </a>
-                    </span>
-                </label>
-            </div>
+                        </Link>
+                    </Checkbox>
+                </Form.Item>
 
-            <div className="text-center mt-6">
-                <button
-                    className="bg-blueGray-800 text-black active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-                    type="submit"
-                >
-                    Create Account
-                </button>
-            </div>
-        </form>
+
+                <Form.Item className="text-center mt-6">
+                    <button
+                        className="bg-blueGray-800 text-black hover:bg-blueGray-600 text-m font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg w-full ease-linear transition-all duration-150"
+                    >
+                        Create Account
+                    </button>
+                </Form.Item>
+            </Form>
+        </div>
     );
 };
-
-

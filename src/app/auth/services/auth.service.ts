@@ -1,60 +1,39 @@
-import { LoginRequest, RegisterRequest, UserLoginResponse } from '@/@types';
-import axios from 'axios';
+// services/auth.service.ts
+import { LoginRequest, RegisterRequest, LoginResponse, UserResponse, BaseResponse } from '@/@types';
+import apiClient from '@/app/utils/axiosInstance'; // Import the Axios instance
 
-const API_URL = 'http://localhost:5165/Auth'; // API URL for authentication
-
-// Create an axios instance with default settings
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Send login request to API
-const login = async (credentials: LoginRequest): Promise<UserLoginResponse> => {
-  try {
-    const response = await apiClient.post<UserLoginResponse>(
-      '/login',
-      credentials
-    );
-    const user = response.data;
-    console.log(user);
-    localStorage.setItem('user', JSON.stringify(user)); // Store user info in localStorage
-    return user;
-  } catch (error: any) {
-    throw new Error(
-      'Login failed: ' + (error.response?.data?.message || error.message)
-    );
+const login = async (credentials: LoginRequest): Promise<BaseResponse<LoginResponse>> => {
+  // Post the login request and specify that the response is a BaseResponse<LoginResponse>
+  const response = await apiClient.post<BaseResponse<LoginResponse>>('/auth/login', credentials);
+  console.log(response.data)
+  // Save the user data to localStorage
+  if (response.data.isSuccess) {
+    localStorage.setItem('user', JSON.stringify(response.data.data));
   }
+  return response.data;
 };
 
-// Send logout request to API
+
 const logout = async (): Promise<void> => {
-  try {
-    await apiClient.post('/logout');
-    localStorage.removeItem('user'); // Remove user info from localStorage
-  } catch (error: any) {
-    throw new Error(
-      'Logout failed: ' + (error.response?.data?.message || error.message)
-    );
-  }
+  await apiClient.post('auth/logout');
+  localStorage.removeItem('user'); // Make sure the user data is removed from storage
 };
 
-const signUp = async (credentials: RegisterRequest): Promise<any> => {
-  try {
-    const response = await axios.post(`${API_URL}/register`, credentials);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(
-      'Register failed: ' + (error.response?.data?.message || error.message)
-    );
-  }
+const signUp = async (credentials: RegisterRequest): Promise<BaseResponse<LoginResponse>> => {
+  // Post the sign up request and specify that the response is a BaseResponse<LoginResponse>
+  const response = await apiClient.post<BaseResponse<LoginResponse>>('auth/register', credentials);
+  return response.data;
 };
+const getUserDetails = async (): Promise<BaseResponse<UserResponse>> => {
+  const response = await apiClient.get<BaseResponse<UserResponse>>('auth/manage/info');
+  return response.data;
+};
+
 const authService = {
   login,
   logout,
   signUp,
+  getUserDetails
 };
 
 export default authService;

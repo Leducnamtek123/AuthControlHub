@@ -1,5 +1,26 @@
+/* global.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 0px; /* Độ rộng của thanh cuộn */
+}
 
+/* Track */
+::-webkit-scrollbar-track {
+    background: #000000; /* Màu nền của track (màu nền nhẹ hơn) */
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #001722; /* Màu của handle (xanh dương đậm) */
+    border-radius: 6px; /* Bo góc của handle */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #000000; /* Màu của handle khi hover (xanh dương đậm hơn) */
+}

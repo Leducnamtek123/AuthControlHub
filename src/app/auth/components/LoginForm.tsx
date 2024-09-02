@@ -1,91 +1,82 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
+import { Form, Input, Button, Checkbox } from 'antd'; // Import Ant Design components
 import { loginAsync } from '@/app/redux/slices/auth.slices';
+import useNotificationMessage from '@/app/hooks/useNotificationMessage';
+import { useLoading } from '@/app/contexts/LoadingContext';
 
-interface LoginFormProps {
-    onSuccess: () => void;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+const LoginForm: React.FC = () => {
     const dispatch = useDispatch();
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const { setLoading } = useLoading(); // Get the setLoading function from context
+    const { success, error: notifyError } = useNotificationMessage(); // Sử dụng hook thông báo
 
-    const handleSignin = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSignin = async (values: any) => {
+        const { email, password } = values;
+
+        setLoading(true); // Set loading to true before starting the request
 
         try {
-            // Dispatch login action
-            await dispatch(loginAsync({ email, password }) as any);
-            onSuccess(); // Callback to handle post-login actions
-            // Redirect if needed
-            router.push('/account'); // Ví dụ điều hướng sau khi đăng nhập thành công
-        } catch (err) {
-            setError('Invalid credentials');
+            await dispatch(loginAsync({ email, password }) as any).unwrap();
+            success('Login successful! Redirecting to your account...');
+            router.push('/account'); // Redirect to the account page on successful login
+        } catch (err: any) {
+            // Capture and display the backend error
+            if (err.response && err.response.data && err.response.data.message) {
+                notifyError(err.response.data.message); // Hiển thị lỗi từ backend
+            } else {
+                notifyError('An unexpected error occurred. Please try again.');
+            }
+        } finally {
+            setLoading(false); // Set loading to false after request is completed
         }
     };
 
     return (
-        <form onSubmit={handleSignin}>
-            <div className="relative w-full mb-3">
-                <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="email">
-                    Email
-                </label>
-                <input
+        <Form
+            name="login_form"
+            onFinish={handleSignin}
+            layout="vertical"
+            initialValues={{ remember: true }}
+        >
+            <Form.Item
+                label="Email"
+                name="email"
+                rules={[{ required: true, message: 'Please input your email!' }]}
+                className="relative w-full mb-3"
+            >
+                <Input
                     type="email"
-                    id="email"
-                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                     placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-            </div>
-
-            <div className="relative w-full mb-3">
-                <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="password">
-                    Password
-                </label>
-                <input
-                    type="password"
-                    id="password"
                     className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                 />
-            </div>
+            </Form.Item>
 
-            {error && (
-                <div className="text-red-500 text-center mb-4">
-                    {error}
-                </div>
-            )}
+            <Form.Item
+                label="Password"
+                name="password"
+                rules={[{ required: true, message: 'Please input your password!' }]}
+                className="relative w-full mb-3"
+            >
+                <Input.Password
+                    placeholder="Password"
+                    className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                />
+            </Form.Item>
 
-            <div>
-                <label className="inline-flex items-center cursor-pointer">
-                    <input
-                        id="customCheckLogin"
-                        type="checkbox"
-                        className="form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150"
-                    />
-                    <span className="ml-2 text-sm font-semibold text-blueGray-600">
-                        Remember me
-                    </span>
-                </label>
-            </div>
+            <Form.Item name="remember" valuePropName="checked" className="w-full mb-3">
+                <Checkbox className="text-blueGray-600" >Remember me</Checkbox>
+            </Form.Item>
 
-            <div className="text-center mt-6">
+            <Form.Item className="text-center mt-6">
                 <button
-                    className="bg-blueGray-800 active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150"
-                    type="submit"
+                    className="bg-blueGray-800 text-black hover:bg-blueGray-600 text-m font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg w-full ease-linear transition-all duration-150"
                 >
                     Sign In
                 </button>
-            </div>
-        </form>
+            </Form.Item>
+        </Form>
     );
 };
 

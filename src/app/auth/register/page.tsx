@@ -2,13 +2,28 @@
 
 import React from 'react';
 import { RegisterForm } from '../components/RegisterForm';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 
 const RegisterPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 h-full">
       <div className="flex content-center items-center justify-center h-full">
         <div className="w-full lg:w-6/12 px-4">
-          <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
+          <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-2">
+            <div className="absolute top-4 right-4 flex items-center">
+              <Link href="/auth/login">
+                <button className="relative text-blueGray-500 text-base cursor-pointer p-2 group">
+                  <span className="transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:-translate-x-3 absolute inset-y-1 left-0 flex items-center -translate-y">
+                    <FontAwesomeIcon 
+                      icon={faArrowLeft} 
+                      className="text-blueGray-500 text-xm"/>
+                  </span>
+                  <span className="ml-3 text-base">Login</span>
+                </button>
+              </Link>
+            </div>
             <div className="rounded-t mb-0 px-6 py-6">
               <div className="text-center mb-3">
                 <h6 className="text-blueGray-500 text-sm font-bold">

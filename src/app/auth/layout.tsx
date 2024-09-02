@@ -1,10 +1,13 @@
 // AuthLayout.tsx
 
 'use client'
-import { ReactNode } from 'react';
-import { Provider } from 'react-redux';
-import store from '../redux/store';
+import { ReactNode, useEffect } from 'react';
 import FooterSmall from './footer';
+import Header from './header';
+import { NotificationProvider } from '../contexts/NotificationContext';
+import { useRouter } from 'next/router';
+import { RootState } from '../redux/store';
+import { useSelector } from 'react-redux';
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -12,19 +15,20 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <Provider store={store}>
+    <>
+      <Header /> {/* Add the Header here */}
       <main>
         <section className="relative w-full h-full py-40 min-h-screen">
           <div
             className="absolute top-0 w-full h-full bg-gray bg-no-repeat bg-full"
           ></div>
-          {children}
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
         </section>
       </main>
-      <FooterSmall absolute />
-
-    </Provider>
-
+      <FooterSmall absolute={false} />
+    </>
   );
 };
 

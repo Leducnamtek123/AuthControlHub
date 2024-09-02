@@ -1,16 +1,15 @@
+'use client'
 // src/app/layout.tsx
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import '../styles/globals.css'
+import '../styles/globals.css';
+import { Provider } from "react-redux";
+import store from "./redux/store";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
+import LoadingSpinner from "./components/LoadingSpinner";
+import { LoadingProvider } from "./contexts/LoadingContext";
+
 const inter = Inter({ subsets: ["latin"] });
 
-// Export metadata for Server Component
-export const metadata: Metadata = {
-  title: "App Layout",
-  description: "App Layout",
-};
-
-// This is a Server Component
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -18,7 +17,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <AntdRegistry>
+          <LoadingProvider>
+            <LoadingSpinner />
+            <Provider store={store}>
+              {children}
+            </Provider>
+          </LoadingProvider>
+        </AntdRegistry>
+      </body>
     </html>
   );
 }
