@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const user = localStorage.getItem('user');
-    
+
     // Kiểm tra nếu tồn tại `accessToken` trước khi thêm vào header
     if (user) {
       const parsedUser = JSON.parse(user);
@@ -22,7 +22,7 @@ axiosInstance.interceptors.request.use(
         config.headers['Authorization'] = `Bearer ${parsedUser.accessToken}`;
       }
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -30,8 +30,8 @@ axiosInstance.interceptors.request.use(
 
 // Response interceptor (optional)
 axiosInstance.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     // Handle errors globally
     return Promise.reject(error);
   }
