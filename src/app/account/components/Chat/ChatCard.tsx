@@ -1,7 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Chat } from "@/types/chat";
 
+export interface Chat {
+  avatar: string;
+  name: string;
+  text: string;
+  time: number;
+  textCount: number;
+  dot: number;
+}
 const chatData: Chat[] = [
   {
     avatar: "/images/user/user-01.png",
@@ -79,9 +86,8 @@ const ChatCard = () => {
                 }}
               />
               <span
-                className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${
-                  chat.dot === 6 ? "bg-meta-6" : `bg-meta-${chat.dot}`
-                } `}
+                className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${chat.dot === 6 ? "bg-meta-6" : `bg-meta-${chat.dot}`
+                  } `}
               ></span>
             </div>
 

@@ -1,31 +1,31 @@
-import { Package } from "@/types/package";
+// import { Package } from "@/types/package";
 
-const packageData: Package[] = [
-  {
-    name: "Free package",
-    price: 0.0,
-    invoiceDate: `Jan 13,2023`,
-    status: "Paid",
-  },
-  {
-    name: "Standard Package",
-    price: 59.0,
-    invoiceDate: `Jan 13,2023`,
-    status: "Paid",
-  },
-  {
-    name: "Business Package",
-    price: 99.0,
-    invoiceDate: `Jan 13,2023`,
-    status: "Unpaid",
-  },
-  {
-    name: "Standard Package",
-    price: 59.0,
-    invoiceDate: `Jan 13,2023`,
-    status: "Pending",
-  },
-];
+// const packageData: Package[] = [
+//   {
+//     name: "Free package",
+//     price: 0.0,
+//     invoiceDate: `Jan 13,2023`,
+//     status: "Paid",
+//   },
+//   {
+//     name: "Standard Package",
+//     price: 59.0,
+//     invoiceDate: `Jan 13,2023`,
+//     status: "Paid",
+//   },
+//   {
+//     name: "Business Package",
+//     price: 99.0,
+//     invoiceDate: `Jan 13,2023`,
+//     status: "Unpaid",
+//   },
+//   {
+//     name: "Standard Package",
+//     price: 59.0,
+//     invoiceDate: `Jan 13,2023`,
+//     status: "Pending",
+//   },
+// ];
 
 const TableThree = () => {
   return (
@@ -49,7 +49,7 @@ const TableThree = () => {
             </tr>
           </thead>
           <tbody>
-            {packageData.map((packageItem, key) => (
+            {/* {packageData.map((packageItem, key) => (
               <tr key={key}>
                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
@@ -64,13 +64,12 @@ const TableThree = () => {
                 </td>
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <p
-                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${
-                      packageItem.status === "Paid"
+                    className={`inline-flex rounded-full bg-opacity-10 px-3 py-1 text-sm font-medium ${packageItem.status === "Paid"
                         ? "bg-success text-success"
                         : packageItem.status === "Unpaid"
                           ? "bg-danger text-danger"
                           : "bg-warning text-warning"
-                    }`}
+                      }`}
                   >
                     {packageItem.status}
                   </p>
@@ -145,7 +144,7 @@ const TableThree = () => {
                   </div>
                 </td>
               </tr>
-            ))}
+            ))} */}
           </tbody>
         </table>
       </div>

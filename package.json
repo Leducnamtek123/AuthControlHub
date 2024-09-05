@@ -15,8 +15,12 @@
     "@reduxjs/toolkit": "^2.2.7",
     "antd": "^5.20.3",
     "axios": "^1.7.5",
+    "cookies-next": "^4.2.1",
     "feather-icons": "^4.29.2",
     "flatpickr": "^4.6.13",
+    "js-cookie": "^3.0.5",
+    "jsvectormap": "^1.6.0",
+    "jwt-decode": "^4.0.0",
     "next": "14.2.6",
     "react": "^18",
     "react-apexcharts": "^1.4.1",
@@ -24,6 +28,7 @@
     "react-redux": "^9.1.2"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

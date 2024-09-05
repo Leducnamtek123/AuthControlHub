@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    
-};
+const nextConfig = {};
 // middleware.config.ts
-export const config = {
-    matcher: ['/admin/:path*', '/dashboard/:path*'], // Các đường dẫn mà middleware áp dụng
-  };
-  
+export const config = {};
+
 export default nextConfig;

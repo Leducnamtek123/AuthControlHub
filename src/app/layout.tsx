@@ -9,7 +9,6 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { LoadingProvider } from "./contexts/LoadingContext";
 
 const inter = Inter({ subsets: ["latin"] });
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,12 +18,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AntdRegistry>
-          <LoadingProvider>
-            <LoadingSpinner />
-            <Provider store={store}>
+          <Provider store={store}>
+            <LoadingProvider>
+              <LoadingSpinner />
               {children}
-            </Provider>
-          </LoadingProvider>
+            </LoadingProvider>
+          </Provider>
         </AntdRegistry>
       </body>
     </html>

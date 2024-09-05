@@ -1,10 +1,9 @@
-import { FilterBase } from "@/@types";
+import { FilterBase } from '@/@types/filter.type';
+import { Permission } from './permission.type';
 
-export interface RoleResponse {
-    email: string;
-    password: string;
-    username: string;
-    phoneNumber: string;
+export interface Role {
+  name: string;
+  description: string;
+  permission: Permission[];
 }
-export interface RoleFilter
-    extends FilterBase { }
+export interface RoleFilter extends FilterBase {}

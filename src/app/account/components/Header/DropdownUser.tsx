@@ -1,38 +1,30 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "../ClickOutside";
-import { AppDispatch, RootState } from "@/app/redux/store";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUserDetailsAsync, logout } from "@/app/redux/slices/auth.slices";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "@/app/redux/store";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/app/contexts/LoadingContext";
+import { logoutAsync } from "@/app/redux/slices/auth.slices";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.auth.user);
   const router = useRouter();
-  const { setLoading } = useLoading(); // Get the setLoading function from context
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchUserDetailsAsync());
-    }
-  }, [dispatch, isAuthenticated]);
-
+  const { setLoading } = useLoading();
+  const dispatch = useDispatch<AppDispatch>();
+  console.log(user?.email)
   const handleLogout = async () => {
-    setLoading(true); // Set loading to true before starting the logout request
-
+    setLoading(true);
     try {
-      await dispatch(logout() as any).unwrap();
-      router.push("/login"); // Redirect to login page after logout
+      await dispatch(logoutAsync());
+      router.push("/auth/login");
     } catch (err) {
       console.error('Logout failed:', err);
-      // Optionally show an error notification or message here
     } finally {
-      setLoading(false); // Set loading to false after the logout request is completed
+      setLoading(false);
     }
   };
 

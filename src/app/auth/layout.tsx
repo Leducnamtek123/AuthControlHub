@@ -5,9 +5,6 @@ import { ReactNode, useEffect } from 'react';
 import FooterSmall from './footer';
 import Header from './header';
 import { NotificationProvider } from '../contexts/NotificationContext';
-import { useRouter } from 'next/router';
-import { RootState } from '../redux/store';
-import { useSelector } from 'react-redux';
 
 interface AuthLayoutProps {
   children: ReactNode;

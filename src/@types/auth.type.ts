@@ -29,3 +29,6 @@ export interface UserInfo {
   firstName: string;
   lastName: string;
 }
+export interface RefreshTokenResponse {
+  accessToken: string;
+}
