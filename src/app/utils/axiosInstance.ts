@@ -1,6 +1,7 @@
-// utils/axiosInstance.ts
 import axios from 'axios';
 import { getCookie, setCookie } from 'cookies-next';
+import authService from '../auth/services/auth.service';
+import { logout } from '../redux/slices/auth.slices';
 
 const API_URL = 'http://localhost:5165/';
 
@@ -11,57 +12,20 @@ const axiosInstance = axios.create({
   },
 });
 
-const refreshToken = async () => {
-  try {
-    const user = getCookie('user');
-    if (user) {
-      const parsedUser = JSON.parse(user as string);
-      const response = await axios.post(`${API_URL}auth/refresh`, {
-        refreshToken: parsedUser.refreshToken,
-      });
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      const updatedUser = {
-        ...parsedUser,
-        accessToken,
-        refreshToken: newRefreshToken,
-      };
-      setCookie('user', JSON.stringify(updatedUser));
-      return accessToken;
-    }
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    throw error;
-  }
-};
-
-// Function to check if token is expired
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const [, payload] = token.split('.');
-    const decodedPayload = JSON.parse(atob(payload));
-    const currentTime = Math.floor(Date.now() / 1000);
-    return decodedPayload.exp < currentTime;
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    return true; // Assume token is expired if there's an error
-  }
-};
-
-// Interceptor để thêm token vào header và refresh token nếu cần
+// Interceptor để thêm token vào request headers
 axiosInstance.interceptors.request.use(
-  async (config) => {
-    const user = getCookie('user');
+  (config) => {
+    const user = getCookie('user'); // Lấy cookie 'user'
 
     if (user) {
-      const parsedUser = JSON.parse(user as string);
-      if (parsedUser?.accessToken) {
-        if (isTokenExpired(parsedUser.accessToken)) {
-          // Token đã hết hạn, refresh token
-          const newAccessToken = await refreshToken();
-          config.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        } else {
+      try {
+        const parsedUser = JSON.parse(user as string); // Parse cookie nếu có
+        if (parsedUser?.accessToken) {
+          // Thêm accessToken vào headers
           config.headers['Authorization'] = `Bearer ${parsedUser.accessToken}`;
         }
+      } catch (error) {
+        console.error('Error parsing user cookie:', error);
       }
     }
 
@@ -69,25 +33,35 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
-// Response interceptor (optional)
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const originalRequest = error.config;
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    if (error.response && error.response.status === 401) {
       try {
-        const newAccessToken = await refreshToken();
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        return axiosInstance(originalRequest);
+        // Gọi API refresh token
+        const refreshResponse = await authService.refreshToken();
+        console.log(refreshResponse);
+        if (refreshResponse.data && refreshResponse.data.accessToken) {
+          // Cập nhật token mới vào cookie hoặc localStorage
+          setCookie(
+            'user',
+            JSON.stringify({ accessToken: refreshResponse.data.accessToken })
+          );
+
+          // Cập nhật token mới cho request hiện tại
+          error.config.headers[
+            'Authorization'
+          ] = `Bearer ${refreshResponse.data.accessToken}`;
+
+          // Thử lại request ban đầu với token mới
+          return axiosInstance(error.config);
+        }
       } catch (refreshError) {
-        // Xử lý lỗi refresh token (ví dụ: đăng xuất người dùng)
-        console.error('Failed to refresh token:', refreshError);
+        console.error('Không thể refresh token:', refreshError);
+        // Xử lý khi refresh token thất bại, ví dụ: đăng xuất người dùng
       }
     }
     return Promise.reject(error);
   }
 );
-
 export default axiosInstance;

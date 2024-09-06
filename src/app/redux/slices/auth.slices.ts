@@ -1,108 +1,86 @@
-// slices/authSlice.ts
-
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  AuthData,
   LoginRequest,
   RegisterRequest,
-  LoginResponse,
   UserResponse,
 } from '@/@types';
 import authService from '@/app/auth/services/auth.service';
 
 interface AuthState {
-  isAuthenticated: boolean;
-  user: LoginResponse | null;
-  loading: boolean;
+  user: AuthData | null;
+  userDetails: UserResponse | null;
+  isLoading: boolean;
   error: string | null;
 }
 
 const initialState: AuthState = {
-  isAuthenticated: false,
   user: null,
-  loading: false,
+  userDetails: null,
+  isLoading: false,
   error: null,
 };
 
-// Thunk for login
-export const loginAsync = createAsyncThunk(
+export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
       if (response.isSuccess) {
         return response.data;
-      } else {
-        return rejectWithValue(response.errors || 'Login failed');
       }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      return rejectWithValue('An unexpected error occurred. Please try again.');
+      return rejectWithValue('Failed to get user details');
+    } catch (error) {
+      return rejectWithValue('Login failed');
     }
   }
 );
 
-// Thunk for signup
-export const signUpAsync = createAsyncThunk(
+export const logout = createAsyncThunk('auth/logout', async () => {
+  await authService.logout();
+});
+
+export const signUp = createAsyncThunk(
   'auth/signUp',
   async (credentials: RegisterRequest, { rejectWithValue }) => {
     try {
       const response = await authService.signUp(credentials);
       if (response.isSuccess) {
         return response.data;
-      } else {
-        return rejectWithValue(response.errors || 'Registration failed');
       }
-    } catch (error: any) {
-      return rejectWithValue('An unexpected error occurred. Please try again.');
+      return rejectWithValue('Failed to get user details');
+    } catch (error) {
+      return rejectWithValue('Sign up failed');
     }
   }
 );
 
-// Thunk for fetching user details
-export const fetchUserDetailsAsync = createAsyncThunk(
-  'auth/fetchUserDetails',
+export const getUserDetails = createAsyncThunk(
+  'auth/getUserDetails',
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.getUserDetails();
       if (response.isSuccess) {
         return response.data;
-      } else {
-        return rejectWithValue(
-          response.errors || 'Failed to fetch user details'
-        );
       }
-    } catch (error: any) {
-      return rejectWithValue('An unexpected error occurred. Please try again.');
+      return rejectWithValue('Failed to get user details');
+    } catch (error) {
+      return rejectWithValue('Failed to get user details');
     }
   }
 );
 
-// Thunk for refreshing token
-export const refreshTokenAsync = createAsyncThunk(
+export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.refreshToken();
       if (response.isSuccess) {
         return response.data;
-      } else {
-        return rejectWithValue(response.errors || 'Token refresh failed');
       }
-    } catch (error: any) {
-      return rejectWithValue('An unexpected error occurred. Please try again.');
-    }
-  }
-);
-
-// Thunk for logout
-export const logoutAsync = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await authService.logout();
-      return null;
-    } catch (error: any) {
-      return rejectWithValue('An unexpected error occurred during logout.');
+      return rejectWithValue('Failed to get user details');
+    } catch (error) {
+      return rejectWithValue('Token refresh failed');
     }
   }
 );
@@ -110,98 +88,53 @@ export const logoutAsync = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    setUserFromSession: (state, action: PayloadAction<UserResponse>) => {
-      state.isAuthenticated = true;
-      state.user = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(loginAsync.pending, (state) => {
-        state.loading = true;
+      .addCase(login.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
-      .addCase(
-        loginAsync.fulfilled,
-        (state, action: PayloadAction<LoginResponse>) => {
-          state.isAuthenticated = true;
-          state.user = action.payload;
-          state.loading = false;
-        }
-      )
-      .addCase(loginAsync.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
+      .addCase(login.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
       })
-      .addCase(signUpAsync.pending, (state) => {
-        state.loading = true;
+      .addCase(login.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
-      .addCase(
-        signUpAsync.fulfilled,
-        (state, action: PayloadAction<LoginResponse>) => {
-          state.isAuthenticated = true;
-          state.user = action.payload;
-          state.loading = false;
-        }
-      )
-      .addCase(signUpAsync.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-      })
-      .addCase(fetchUserDetailsAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        fetchUserDetailsAsync.fulfilled,
-        (state, action: PayloadAction<UserResponse>) => {
-          state.user = action.payload;
-          state.loading = false;
-        }
-      )
-      .addCase(fetchUserDetailsAsync.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-      })
-      .addCase(refreshTokenAsync.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(
-        refreshTokenAsync.fulfilled,
-        (state, action: PayloadAction<LoginResponse>) => {
-          if (state.user) {
-            state.user = {
-              ...state.user,
-              ...action.payload,
-            };
-          }
-          state.loading = false;
-        }
-      )
-      .addCase(refreshTokenAsync.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-        state.isAuthenticated = false;
+      .addCase(logout.fulfilled, (state) => {
+        state.isLoading = false;
         state.user = null;
+        state.userDetails = null;
       })
-      .addCase(logoutAsync.pending, (state) => {
-        state.loading = true;
+      .addCase(logout.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(signUp.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
-      .addCase(logoutAsync.fulfilled, (state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-        state.loading = false;
+      .addCase(signUp.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
       })
-      .addCase(logoutAsync.rejected, (state, action) => {
+      .addCase(signUp.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.payload as string;
-        state.loading = false;
+      })
+      .addCase(getUserDetails.fulfilled, (state, action) => {
+        state.userDetails = action.payload;
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.user = action.payload;
       });
   },
 });
 
-export const { setUserFromSession } = authSlice.actions;
 export default authSlice.reducer;

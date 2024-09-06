@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Input, Checkbox, Form, Spin } from 'antd';
-import { RootState } from '@/app/redux/store';
-import { signUpAsync } from '@/app/redux/slices/auth.slices';
 import { useRouter } from 'next/navigation';
 import useNotificationMessage from '@/app/hooks/useNotificationMessage';
 import { useLoading } from '@/app/contexts/LoadingContext';
 import Link from 'next/link';
+import { signUp } from '@/app/redux/slices/auth.slices';
 
 export const RegisterForm: React.FC = () => {
     const dispatch = useDispatch();
@@ -26,7 +25,7 @@ export const RegisterForm: React.FC = () => {
         setLoading(true); // Set loading to true before starting the request
 
         try {
-            await dispatch(signUpAsync({ email, password, firstName, lastName, phoneNumber }) as any).unwrap();
+            await dispatch(signUp({ email, password, firstName, lastName, phoneNumber }) as any).unwrap();
             success('Registration successful! Redirecting to login page...');
             router.push('/auth/login');
         } catch (err: any) {

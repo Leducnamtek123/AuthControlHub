@@ -2,9 +2,9 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { Form, Input, Button, Checkbox } from 'antd'; // Import Ant Design components
-import { loginAsync } from '@/app/redux/slices/auth.slices';
 import useNotificationMessage from '@/app/hooks/useNotificationMessage';
 import { useLoading } from '@/app/contexts/LoadingContext';
+import { login } from '@/app/redux/slices/auth.slices';
 
 const LoginForm: React.FC = () => {
     const dispatch = useDispatch();
@@ -18,7 +18,7 @@ const LoginForm: React.FC = () => {
         setLoading(true); // Set loading to true before starting the request
 
         try {
-            await dispatch(loginAsync({ email, password }) as any).unwrap();
+            await dispatch(login({ email, password }) as any).unwrap();
             success('Login successful! Redirecting to your account...');
             router.push('/account'); // Redirect to the account page on successful login
         } catch (err: any) {

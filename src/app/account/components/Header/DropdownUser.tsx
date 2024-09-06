@@ -7,19 +7,24 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/app/redux/store";
 import { useRouter } from "next/navigation";
 import { useLoading } from "@/app/contexts/LoadingContext";
-import { logoutAsync } from "@/app/redux/slices/auth.slices";
+import { logout, getUserDetails } from "@/app/redux/slices/auth.slices";
+import { useEffect } from "react";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
   const router = useRouter();
   const { setLoading } = useLoading();
   const dispatch = useDispatch<AppDispatch>();
-  console.log(user?.email)
+  const userDetails = useSelector((state: RootState) => state.auth.userDetails);
+
+  useEffect(() => {
+    dispatch(getUserDetails());
+  }, [dispatch]);
+
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await dispatch(logoutAsync());
+      await dispatch(logout());
       router.push("/auth/login");
     } catch (err) {
       console.error('Logout failed:', err);
@@ -37,8 +42,10 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {user?.email || "User Name"}
+            {userDetails?.email || "User Name"}
           </span>
+          {/* <span className="block text-xs">{userDetails?.role || "User Role"}</span> */}
+
           <span className="block text-xs">{"User Role"}</span>
         </span>
 
@@ -46,7 +53,9 @@ const DropdownUser = () => {
           <Image
             width={112}
             height={112}
+            // src={userDetails?.avatar || "/images/user/user-01.png"}
             src={"/images/user/user-01.png"}
+
             style={{ width: "auto", height: "auto" }}
             alt="User"
           />
