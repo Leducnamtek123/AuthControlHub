@@ -2,18 +2,20 @@
 import {
   LoginRequest,
   RegisterRequest,
-  LoginResponse,
+  LoginData,
   UserResponse,
   BaseResponse,
+  RefreshTokenResponse,
+  RegisterData,
 } from '@/@types';
 import apiClient from '@/app/utils/axiosInstance'; // Import the Axios instance
 import { setCookie, deleteCookie } from 'cookies-next';
 
 const login = async (
   credentials: LoginRequest
-): Promise<BaseResponse<LoginResponse>> => {
-  // Post the login request and specify that the response is a BaseResponse<LoginResponse>
-  const response = await apiClient.post<BaseResponse<LoginResponse>>(
+): Promise<BaseResponse<LoginData>> => {
+  // Post the login request and specify that the response is a BaseResponse<LoginData>
+  const response = await apiClient.post<BaseResponse<LoginData>>(
     '/auth/login',
     credentials
   );
@@ -32,9 +34,9 @@ const logout = async (): Promise<void> => {
 
 const signUp = async (
   credentials: RegisterRequest
-): Promise<BaseResponse<LoginResponse>> => {
-  // Post the sign up request and specify that the response is a BaseResponse<LoginResponse>
-  const response = await apiClient.post<BaseResponse<LoginResponse>>(
+): Promise<BaseResponse<RegisterData>> => {
+  // Post the sign up request and specify that the response is a BaseResponse<LoginData>
+  const response = await apiClient.post<BaseResponse<RegisterData>>(
     'auth/register',
     credentials
   );
@@ -48,13 +50,14 @@ const getUserDetails = async (): Promise<BaseResponse<UserResponse>> => {
   return response.data;
 };
 
-const refreshToken = async (): Promise<BaseResponse<LoginResponse>> => {
-  const response = await apiClient.post<BaseResponse<LoginResponse>>(
+const refreshToken = async (): Promise<BaseResponse<RefreshTokenResponse>> => {
+  const response = await apiClient.post<BaseResponse<RefreshTokenResponse>>(
     'auth/refresh'
   );
   if (response.data.isSuccess) {
     setCookie('user', JSON.stringify(response.data.data));
   }
+  console.log(response.data);
   return response.data;
 };
 

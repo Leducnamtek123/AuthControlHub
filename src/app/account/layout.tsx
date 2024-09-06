@@ -6,10 +6,7 @@ import DefaultLayout from './components/Layouts/DefaultLayout';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store'; // Adjust the import path as needed
 import { fetchUserDetailsAsync } from '../redux/slices/auth.slices'; // Adjust the import path as needed
-import { Spin } from 'antd';
 import { useLoading } from '../contexts/LoadingContext';
-import { LoadingOutlined } from '@ant-design/icons';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 interface AccountLayoutProps {
     children: ReactNode;

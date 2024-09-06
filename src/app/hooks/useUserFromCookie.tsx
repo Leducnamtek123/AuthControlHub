@@ -12,8 +12,8 @@ const useUserFromCookie = () => {
     const userCookie = Cookies.get('user'); // Lấy cookie người dùng
     if (userCookie) {
       try {
-        const parsedUser: UserResponse = JSON.parse(userCookie); // Parse dữ liệu người dùng từ cookie
-        dispatch(setUserFromSession(parsedUser)); // Cập nhật người dùng vào Redux store
+        const parsedUser: UserResponse & { token: string } = JSON.parse(userCookie); // Parse dữ liệu người dùng từ cookie
+        dispatch(setUserFromSession({ user: parsedUser, token: parsedUser.token })); // Wrap parsedUser in an object
       } catch (error) {
         console.error('Failed to parse user cookie:', error);
       }
